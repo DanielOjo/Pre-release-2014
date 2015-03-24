@@ -5,6 +5,7 @@
 # version 2 edited 06/03/2014
 
 import random
+from datetime import date
 
 NO_OF_RECENT_SCORES = 3
 
@@ -17,6 +18,7 @@ class TRecentScore():
   def __init__(self):
     self.Name = ''
     self.Score = 0
+    self.Date = None
 
 Deck = [None]
 RecentScores = [None]
@@ -77,11 +79,7 @@ def DisplayMenu():
 
 def GetMenuChoice():
   Choice = input()
-  if Choice == Choice.upper():
-    Choice = Choice.lower()
-  elif Choice == "Quit":
-    Choice = "q"
-    
+  Choice = Choice.lower()[0]
   print()
   return Choice
 
@@ -133,20 +131,19 @@ def IsNextCardHigher(LastCard, NextCard):
 
 def GetPlayerName():
   print()
-  PlayerName = input('Please enter your name: ')
-  while PlayerName == "":
-    print("You must enter something for your name!")
+  valid = False
+  while not valid:
     PlayerName = input('Please enter your name: ')
+    if len(PlayerName)> 0:
+      valid = True
+    else:
+      print("You must enter something for your name!")
   print()
   return PlayerName
 
 def GetChoiceFromUser():
   Choice = input('Do you think the next card will be higher than the last card (enter y or n)? ')
-  Choice = Choice.lower()
-  if Choice == "Yes" or "yes":
-    Choice = "y"
-  elif Choice == "No" or "no":
-    Choice = "n"
+  Choice = Choice.lower()[0]
   return Choice
 
 def DisplayEndOfGameMessage(Score):
@@ -168,34 +165,49 @@ def ResetRecentScores(RecentScores):
   for Count in range(1, NO_OF_RECENT_SCORES + 1):
     RecentScores[Count].Name = ''
     RecentScores[Count].Score = 0
+    RecentScores[Count].Date = None
 
 def DisplayRecentScores(RecentScores):
   print()
   print('Recent Scores: ')
   print()
-  for Count in range(1, NO_OF_RECENT_SCORES + 1):
-    print(RecentScores[Count].Name, 'got a score of', RecentScores[Count].Score)
+  print("{0:<12} {1:<10} {2:<10}".format("Date","Name","Score"))
+  for Count in range(1, NO_OF_RECENT_SCORES + 1): 
+    date_of_score = RecentScores[Count].Date.strftime("%d/%m/%Y")
+    print("{0:<12} {1:<10} {2:<10}".format(date_of_score, RecentScores[Count].Name,RecentScores[Count].Score))
   print()
   print('Press the Enter key to return to the main menu')
   input()
   print()
 
+
 def UpdateRecentScores(RecentScores, Score):
-  PlayerName = GetPlayerName()
-  FoundSpace = False
-  Count = 1
-  while (not FoundSpace) and (Count <= NO_OF_RECENT_SCORES):
-    if RecentScores[Count].Name == '':
-      FoundSpace = True
+  valid = False
+  while not valid:
+    Choice = input("Do you want to add your score to the high score table? (y or n): ")
+    Choice = Choice.lower()[0]
+    if Choice == "y" or "n":
+      valid = True
     else:
-      Count = Count + 1
-  if not FoundSpace:
-    for Count in range(1, NO_OF_RECENT_SCORES):
-      RecentScores[Count].Name = RecentScores[Count + 1].Name
-      RecentScores[Count].Score = RecentScores[Count + 1].Score
-    Count = NO_OF_RECENT_SCORES
-  RecentScores[Count].Name = PlayerName
-  RecentScores[Count].Score = Score
+      print("Please enter y for Yes or n for No")
+
+  if Choice == "y":
+    PlayerName = GetPlayerName()
+    FoundSpace = False
+    Count = 1
+    while (not FoundSpace) and (Count <= NO_OF_RECENT_SCORES):
+      if RecentScores[Count].Name == '':
+        FoundSpace = True
+      else:
+        Count = Count + 1
+    if not FoundSpace:
+      for Count in range(1, NO_OF_RECENT_SCORES):
+        RecentScores[Count].Name = RecentScores[Count + 1].Name
+        RecentScores[Count].Score = RecentScores[Count + 1].Score
+      Count = NO_OF_RECENT_SCORES
+    RecentScores[Count].Name = PlayerName
+    RecentScores[Count].Score = Score
+    RecentScores[Count].Date = date.today()
 
 def PlayGame(Deck, RecentScores):
   LastCard = TCard()
